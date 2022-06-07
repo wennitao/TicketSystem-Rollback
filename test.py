@@ -6,14 +6,17 @@ import time
 # folderName = input ()
 # testcase_num = int(input ())
 
-folderNames = ['basic_1', 'basic_2', 'basic_3', 'basic_4', 'basic_5', 'basic_6', 'basic_extra', 'pressure_1_easy', 'pressure_1_hard', 'pressure_2_easy', 'pressure_2_hard', 'pressure_3_easy', 'pressure_3_hard']
-testcase_nums = [1, 1, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+# folderNames = ['basic_1', 'basic_2', 'basic_3', 'basic_4', 'basic_5', 'basic_6', 'basic_extra', 'pressure_1_easy', 'pressure_1_hard', 'pressure_2_easy', 'pressure_2_hard', 'pressure_3_easy', 'pressure_3_hard']
+# testcase_nums = [1, 1, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
-# folderNames = ['basic_1', 'basic_2', 'basic_3', 'basic_4', 'basic_5', 'basic_6', 'basic_extra', 'pressure_1_easy', 'pressure_2_easy', 'pressure_3_easy']
-# testcase_nums = [1, 1, 5, 5, 10, 10, 10, 10, 10, 10]
+# folderNames = ['basic_1', 'basic_2', 'basic_3', 'basic_4', 'basic_5', 'basic_6', 'basic_extra', 'pressure_1_easy', 'pressure_1_hard']
+# testcase_nums = [3, 2, 11, 11, 20, 20, 21, 20, 20]
 
-# folderNames= ['basic_6']
-# testcase_nums = [10]
+# folderNames = ['basic_1', 'basic_2', 'basic_3', 'basic_4', 'basic_5', 'basic_6']
+# testcase_nums = [3, 2, 11, 11, 20, 20]
+
+folderNames= ['pressure_1_hard']
+testcase_nums = [20]
 
 def runForce():
     for case in range (len (folderNames)):
@@ -39,7 +42,7 @@ def runRollback():
             print("rollback", i, "...")
             os.system("touch test/" + folderName + "/" + str(i) + ".out")
             curCaseT = time.time()
-            os.system("./code < total_noRoll/" + folderName + "/" + str(i) + ".in > test/" + folderName + "/" + str(i) + ".out")
+            os.system("./code < total_rollback/" + folderName + "/" + str(i) + ".in > test/" + folderName + "/" + str(i) + ".out")
             curT = time.time() - curCaseT
             print(str(i) + ".in " + str(curT) + " seconds")
         tt = time.time() - t
@@ -52,10 +55,11 @@ def runEvaluate():
         print("evaluate " + folderName)
         for i in range(1, testcase_num + 1):
             print("evaluate", i, "...")
-            ret = os.system("diff test/" + folderName + "/" + str(i) + ".out" + " out/" + folderName + "/" + str(i) + ".out")
+            ret = os.system("diff test/" + folderName + "/" + str(i) + ".out" + " output/" + folderName + "/" + str(i) + ".out")
             if ret != 0:
                 print("error in", i, "!")
+                break
 
 # runForce()
-runRollback()
-# runEvaluate()
+# runRollback()
+runEvaluate()

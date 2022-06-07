@@ -190,6 +190,8 @@ public:
                 query_profile () ;
             } else if (strcmp (argument[1], "modify_profile") == 0) {
                 modify_profile () ;
+            } else if (strcmp (argument[1], "modify_profile_root") == 0) {
+                modify_profile_root () ;
             } else if (strcmp (argument[1], "add_train") == 0) {
                 add_train () ;
             } else if (strcmp (argument[1], "release_train") == 0) {
@@ -419,8 +421,9 @@ public:
         if (!isRollback) {
             #ifdef rollbackSwitch
                 std::string logStr = "["; logStr += int_to_str (timeStamp).str; logStr += "] " ;
-                logStr += "modify_profile -c " ;
+                logStr += "modify_profile_root -c " ;
                 logStr = logStr + username.str ;
+                // logStr = logStr + cur_username.str ;
                 logStr = logStr + " -u " + username.str ;
                 if (!password.empty()) logStr = logStr + " -p " + modify_user.getPassword().str ;
                 if (!name.empty()) logStr = logStr + " -n " + modify_user.getName().str ;
@@ -442,6 +445,31 @@ public:
         user_write (modify_user_file_pos, modify_user) ;
 
         if (!isRollback) std::cout << modify_user << std::endl ;
+    }
+
+    void modify_profile_root () {
+        String cur_username, username, password, name, mailAddr ;
+        int privilege = -1 ;
+        for (int i = 2; i <= key_cnt; i += 2) {
+            if (argument[i][1] == 'c') cur_username = argument[i + 1] ;
+            else if (argument[i][1] == 'u') username = argument[i + 1] ;
+            else if (argument[i][1] == 'p') password = argument[i + 1] ;
+            else if (argument[i][1] == 'n') name = argument[i + 1] ;
+            else if (argument[i][1] == 'm') mailAddr = argument[i + 1] ;
+            else if (argument[i][1] == 'g') privilege = String (argument[i + 1]).toInt() ;
+        }
+
+        sjtu::vector<int> pos ;
+        users.find (data (username, 0), pos) ;
+        if (pos.empty()) throw "user not found" ;
+        int modify_user_file_pos = pos[0] ;
+        user modify_user; user_read (modify_user, modify_user_file_pos) ;
+
+        if (!password.empty()) modify_user.modifyPassword (password) ;
+        if (!name.empty()) modify_user.modifyName (name) ;
+        if (!mailAddr.empty()) modify_user.modifyMailAddress (mailAddr) ;
+        if (privilege != -1) modify_user.modifyPrivilege (privilege) ;
+        user_write (modify_user_file_pos, modify_user) ;
     }
 
     String int_to_str (int x) {
@@ -618,6 +646,7 @@ public:
         }
         trains.erase (data (trainID, train_file_pos)) ;
         train_delete (train_file_pos) ;
+        // printf("!!! delete train %s\n", trainID.str) ;
 
         if (!isRollback) {
             printf("0\n") ; 
@@ -1220,7 +1249,9 @@ public:
         long long curFilePos = get_last_log_pos() ;
         while (curFilePos != -1) {
             log curLog; log_read (curLog, curFilePos) ;
-            // printf("curLog: timestamp: %d %s\n", curLog.timeStamp, curLog.str) ;
+            #ifdef debug
+                printf("curLog: timestamp: %d %s\n", curLog.timeStamp, curLog.str) ;
+            #endif
             if (curLog.timeStamp <= targTimeStamp) break ;
             op.clear(); op = std::string (curLog.str) ;
             // if (targTimeStamp == 5900765) std::cout << op << "\n" ;
